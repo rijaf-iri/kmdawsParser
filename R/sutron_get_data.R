@@ -80,7 +80,7 @@ get.sutron.data <- function(conn, dirAWS, dirUP = NULL, upload = TRUE){
     utils::write.table(awsInfo, awsFile, sep = ",", na = "", col.names = TRUE,
                        row.names = FALSE, quote = FALSE)
     if(upload){
-        adtFile <- file.path(dirUP, "AWS_DATA", "CSV", basename(adtFile))
+        adtFile <- file.path(dirUP, "AWS_DATA", "CSV", basename(awsFile))
         ssh::scp_upload(session, awsFile, to = adtFile, verbose = FALSE)
     }
 

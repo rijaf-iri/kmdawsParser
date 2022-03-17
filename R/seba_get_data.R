@@ -32,23 +32,8 @@ get.seba.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
 
     awsInfo <- utils::read.table(awsFile, header = TRUE, sep = ",", na.strings = "",
                                  stringsAsFactors = FALSE, quote = "\"")
-    #####
-    # lastDate <- as.integer(awsInfo$last)
-    # lastDate <- as.POSIXct(lastDate, origin = origin, tz = tz)
-    # startDate <- format(lastDate, "%Y-%m-%d")
-    # lastDate2 <- as.integer(awsInfo$last)
-
     lastDate <- as.integer(awsInfo$last)
     startDate <- as.Date(as.POSIXct(lastDate, origin = origin, tz = tz))
-    # endDate <- as.Date(Sys.time())
-
-
-    ## initial
-    # start_day <- "2015-01-01"
-    # end_day <- "2022-03-10"
-    # startDate <- as.Date(start_day)
-    # lastDate <- as.Date(end_day)
-    #####
 
     awsID <- awsInfo$id
     awsDIR <- awsInfo$dirName
@@ -94,6 +79,9 @@ get.seba.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
         out <- do.call(rbind, out)
         if(is.null(out)) next
 
+        out <- out[!is.na(out$obs_time), , drop = FALSE]
+        if(nrow(out) == 0) next
+
         ilast <- out$obs_time > lastDate[j]
         out <- out[ilast, , drop = FALSE]
         if(nrow(out) == 0) next
@@ -113,7 +101,7 @@ get.seba.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
     utils::write.table(awsInfo, awsFile, sep = ",", na = "", col.names = TRUE,
                        row.names = FALSE, quote = FALSE)
     if(upload){
-        adtFile <- file.path(dirUP, "AWS_DATA", "CSV", basename(adtFile))
+        adtFile <- file.path(dirUP, "AWS_DATA", "CSV", basename(awsFile))
         ssh::scp_upload(session, awsFile, to = adtFile, verbose = FALSE)
     }
 
