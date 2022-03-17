@@ -41,7 +41,11 @@ get.sutron.data <- function(conn, dirAWS, dirUP = NULL, upload = TRUE){
     varTable <- var.network.table(varFile)
 
     for(j in seq_along(awsTable)){
-        query <- paste0("SELECT * FROM xc_data1 WHERE STATION_ID='", awsTable[j], "' AND TIME_TAG > '", lastDate[j], "'")
+        if(is.na(lastDate[j])){
+            query <- paste0("SELECT * FROM xc_data1 WHERE STATION_ID='", awsTable[j], "'")
+        }else{
+            query <- paste0("SELECT * FROM xc_data1 WHERE STATION_ID='", awsTable[j], "' AND TIME_TAG > '", lastDate[j], "'")
+        }
         qres <- try(DBI::dbGetQuery(conn, query), silent = TRUE)
         if(inherits(qres, "try-error")){
             msg <- paste("Unable to get data for", awsID[j])
