@@ -7,7 +7,6 @@ read.campbell.table <- function(file_csv){
     h <- x[2]
     lenh <- length(strsplit(h, ",")[[1]])
     x <- x[-(1:4)]
-    x <- gsub(missval, "", x)
     x <- strsplit(x, ",")
     len <- sapply(x, length)
     il <- len == lenh
@@ -16,7 +15,9 @@ read.campbell.table <- function(file_csv){
     h <- utils::read.table(text = h, header = TRUE, sep = ",",
                            colClasses = "character", na.strings = "",
                            stringsAsFactors = FALSE, quote = "\"")
-    x <- lapply(x[il], function(v) gsub("\\\"", "", v))
+    
+    x <- lapply(x[il], function(v) gsub(missval, "", v))
+    x <- lapply(x, function(v) gsub("\\\"", "", v))
     x <- do.call(rbind, x)
     x[x == ""] <- NA
     x <- as.data.frame(x, stringsAsFactors = FALSE)

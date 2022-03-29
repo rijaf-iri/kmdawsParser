@@ -1,5 +1,8 @@
 
 get.microstep.data <- function(conn, dirAWS, dirUP = NULL, upload = TRUE){
+    on.exit({
+        if(upload) ssh::ssh_disconnect(session)
+    })
     tz <- Sys.getenv("TZ")
     origin <- "1970-01-01"
 

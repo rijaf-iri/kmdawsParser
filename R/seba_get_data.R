@@ -1,5 +1,8 @@
 
 get.seba.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
+    on.exit({
+        if(upload) ssh::ssh_disconnect(session)
+    })
     tz <- Sys.getenv("TZ")
     origin <- "1970-01-01"
 
@@ -33,6 +36,7 @@ get.seba.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
     awsInfo <- utils::read.table(awsFile, header = TRUE, sep = ",", na.strings = "",
                                  stringsAsFactors = FALSE, quote = "\"")
     lastDate <- as.integer(awsInfo$last)
+    lastDate[is.na(lastDate)] <- as.numeric(as.POSIXct("2015-01-01 00:00:00", tz = tz))
     startDate <- as.Date(as.POSIXct(lastDate, origin = origin, tz = tz))
 
     awsID <- awsInfo$id
@@ -82,7 +86,11 @@ get.seba.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
         out <- out[!is.na(out$obs_time), , drop = FALSE]
         if(nrow(out) == 0) next
 
-        ilast <- out$obs_time > lastDate[j]
+        if(is.na(lastDate[j])){
+            ilast <- rep(TRUE, nrow(out))
+        }else{
+            ilast <- out$obs_time > lastDate[j]
+        }
         out <- out[ilast, , drop = FALSE]
         if(nrow(out) == 0) next
 

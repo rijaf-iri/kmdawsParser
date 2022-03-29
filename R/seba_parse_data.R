@@ -13,13 +13,13 @@ read.seba.table <- function(file_csv){
                            stringsAsFactors = FALSE, quote = "\"")
     lenh <- length(names(h))
     x <- x[-1]
-    x <- gsub(missval, "", x)
     x <- strsplit(x, ";")
     len <- sapply(x, length)
     il <- len == lenh
     if(!any(il)) return(row0)
 
-    x <- lapply(x[il], function(v) gsub("\\\"", "", v))
+    x <- lapply(x[il], function(v) gsub(missval, "", v))
+    x <- lapply(x, function(v) gsub("\\\"", "", v))
     x <- do.call(rbind, x)
     x[x == ""] <- NA
     x <- as.data.frame(x, stringsAsFactors = FALSE)

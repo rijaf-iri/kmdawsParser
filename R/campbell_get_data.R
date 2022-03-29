@@ -1,4 +1,7 @@
 get.campbell.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
+    on.exit({
+        if(upload) ssh::ssh_disconnect(session)
+    })
     tz <- Sys.getenv("TZ")
     origin <- "1970-01-01"
 
@@ -34,6 +37,7 @@ get.campbell.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
 
     lastDate <- as.integer(awsInfo$last)
     startDate <- as.Date(as.POSIXct(lastDate, origin = origin, tz = tz))
+    startDate[is.na(startDate)] <- as.Date("2015-01-01")
     endDate <- as.Date(Sys.time())
 
     awsID <- awsInfo$id
@@ -81,7 +85,11 @@ get.campbell.data <- function(dirFTP, dirAWS, dirUP = NULL, upload = TRUE){
         out <- do.call(rbind, out)
         if(is.null(out)) next
 
-        ilast <- out$obs_time > lastDate[j]
+        if(is.na(lastDate[j])){
+            ilast <- rep(TRUE, nrow(out))
+        }else{
+            ilast <- out$obs_time > lastDate[j]
+        }
         out <- out[ilast, , drop = FALSE]
         if(nrow(out) == 0) next
 
